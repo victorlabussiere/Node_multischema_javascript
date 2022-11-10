@@ -1,9 +1,9 @@
 const Mongoose = require('mongoose');
-
 Mongoose.connect('mongodb://admin:vasco@localhost:27017/')
     .catch(e => console.error('Erro na conexão', e))
 
 const connection = Mongoose.connection
+const database_hero = Mongoose.connection.useDb('heros') 
 connection.once('open', () => console.log('Conexão estabelecida.'))
 
 const schemaHero = new Mongoose.Schema({
@@ -16,8 +16,7 @@ const schemaHero = new Mongoose.Schema({
         required: true
     }
 })
-
-const model = Mongoose.connection.useDb('heros').model('meus-herois', schemaHero,)
+const model = database_hero.model('meus-herois', schemaHero,)
 
 async function main() {
     const create = await model.create({

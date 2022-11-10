@@ -54,7 +54,10 @@ class Postgres extends ICrud {
         let count = 0
         const list = await this._herois.findAll()
             .then(res => res.map(hero => hero.dataValues))
-            .then(dat => dat.map(inst => (inst.poder, inst.nome) === (item.poder, item.nome) || inst.id === item.id ? count++ : count + 0))
+            .then(dat => dat.map(inst =>
+                inst.poder === item.poder && inst.nome === item.nome || inst.id === item.id
+                    ? count++
+                    : count + 0))
             .catch(errCreate => console.error('HERÓI NÃO CADASTRADO:', errCreate.message))
 
         if (count === 0) {
@@ -65,12 +68,15 @@ class Postgres extends ICrud {
     }
 
     async read(params = {}) {
-        const query = params ? { where: params, raw: true } : { raw: true }
+        const query = params
+            ? { where: params, raw: true }
+            : { raw: true }
         return await this._herois.findAll(query)
     }
 
     async update(id, item) {
-        const response = await this._herois.update(item, { where: { id: id } }).catch(err => console.error('UPDATE Error', err))
+        const response = await this._herois.update(item, { where: { id: id } })
+            .catch(err => console.error('UPDATE Error', err))
         return response
     }
 

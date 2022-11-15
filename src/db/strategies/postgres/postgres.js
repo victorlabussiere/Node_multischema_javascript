@@ -1,16 +1,15 @@
-const ICrud = require('./interfaces/InterfaceCrud')
+const ICrud = require('../interfaces/InterfaceCrud')
 const Sequelize = require('sequelize')
 
 class Postgres extends ICrud {
-    constructor() {
+    constructor(connection, schema) {
         super()
-        this._driver = null
-        this._herois = null
-        this.connect()
+        this._connection = connection
+        this._schema = schema
     }
 
-    async connect() {
-        this._driver = new Sequelize(
+    static async connect() {
+        const connection = new Sequelize(
             'heroes',
             'victorlabu',
             'vasco',
@@ -18,41 +17,30 @@ class Postgres extends ICrud {
                 host: 'localhost',
                 dialect: 'postgres',
                 quoteIdentifiers: false,
-                operatorAliases: false
+                operatorAliases: false,
+                logging: false
             }
         )
-        await this.defineModel()
-    }
-
-    async defineModel() {
-        this._herois = await this._driver.define('herois', {
-            id: {
-                type: Sequelize.INTEGER,
-                required: true,
-                primaryKey: true,
-                autoIncrement: true
-            },
-            nome: {
-                type: Sequelize.STRING,
-                required: true
-            },
-            poder: {
-                type: Sequelize.STRING,
-                required: true
-            }
-        })
-        this._herois.sync()
+        return connection
     }
 
     async isConnected() {
-        return await this._driver.authenticate()
-            .then(response => response = true)
+        return await this._connection.authenticate()
+            .then(res => res = true)
             .catch(error => console.error('Connection error', error))
     }
-    //
+
+    static async defineModel(connection, schema) {
+        const model = connection.define(
+            schema.name, schema.schema, schema.options
+        )
+        await model.sync()
+        return model
+    }
+
     async create(item) {
         let count = 0
-        await this._herois.findAll()
+        await this._schema.findAll()
             .then(res => res.map(hero => hero.dataValues))
             .then(dat => dat.map(inst =>
                 inst.poder === item.poder && inst.nome === item.nome || inst.id === item.id
@@ -62,7 +50,7 @@ class Postgres extends ICrud {
             .catch(errCreate => console.error('HERÓI NÃO CADASTRADO:', errCreate.message))
 
         return count === 0
-            ? await this._herois.create(item).then(res => res.dataValues)
+            ? await this._schema.create(item).then(res => res.dataValues)
             : "Herói já cadastrado! Tente outro."
     }
 
@@ -70,11 +58,11 @@ class Postgres extends ICrud {
         const query = params
             ? { where: params, raw: true }
             : { raw: true }
-        return await this._herois.findAll(query)
+        return await this._schema.findAll(query)
     }
 
     async update(id, item) {
-        const response = await this._herois.update(item, { where: { id: id } })
+        const response = await this._schema.update(item, { where: { id: id } })
             .catch(err => console.error('UPDATE Error', err))
         return response
     }
@@ -84,7 +72,7 @@ class Postgres extends ICrud {
             ? { id }
             : {}
 
-        return await this._herois.destroy({ where: query })
+        return await this._schema.destroy({ where: query })
     }
 }
 module.exports = Postgres

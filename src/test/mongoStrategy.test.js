@@ -1,17 +1,20 @@
 const assert = require('assert');
-const { isArrayBuffer } = require('util/types');
+const heroisSchema = require('../db/strategies/mongodb/schemas/herosSchema')
 const Context = require('../db/strategies/base/contextStrategy')
 const Mongo = require('../db/strategies/mongodb/mongodb');
 
-const context = new Context(new Mongo())
 describe('MongoDb suíte de testes', function () {
+    
+    let context = {}
     this.beforeAll(async () => {
-        await context.connect()
+        const connection = Mongo.connect()
+        context = new Context(new Mongo(connection, heroisSchema))
         await context.create({
             name: "Vasco",
             poder: "Subir"
         })
     })
+
     const DEFAULT_HERO = {
         name: 'Victor',
         poder: 'Javascript'
@@ -48,4 +51,5 @@ describe('MongoDb suíte de testes', function () {
         // console.log('RESULTADO DELETE', result)
         assert.deepEqual(result, true)
     })
+    
 })

@@ -1,8 +1,9 @@
 const assert = require('assert')
-const Postgres = require('../db/strategies/postgres')
+const Postgres = require('../db/strategies/postgres/postgres')
+const PostgresSchema = require('../db/strategies/postgres/schema/heroSchema')
 const Context = require('../db/strategies/base/contextStrategy')
+const HeroSchema = require('../db/strategies/postgres/schema/heroSchema')
 
-const context = new Context(new Postgres())
 const MOCK_HEROI_CADASTRAR = {
     nome: 'Gavia Negro',
     poder: 'Flechada',
@@ -10,8 +11,12 @@ const MOCK_HEROI_CADASTRAR = {
 }
 
 describe('Postgres Strategy', () => {
-
+    let context = {}
     beforeEach(async () => {
+        const connection = await Postgres.connect()
+        const model = await Postgres.defineModel(connection, HeroSchema)
+        context = new Context(new Postgres(connection, model))
+
         context.create({
             nome: "Victor",
             poder: "Javascript",
@@ -45,7 +50,7 @@ describe('Postgres Strategy', () => {
     it('READ SEM QUERY deve retornar uma lista com todas as instâncias da tabela.', async () => {
         const result = await context.read()
         const expected = 1
-        console.log('READ WITHOUT QUERY LIST LENGTH ===>', result)
+        // console.log('READ WITHOUT QUERY LIST LENGTH ===>', result)
         assert.ok(result.length !== expected)
     })
 

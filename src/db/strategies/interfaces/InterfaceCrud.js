@@ -4,7 +4,7 @@ class NotImplementedException extends Error {
     }
 }
 class ICrud {
-    connect() {
+    static connect() {
         throw new NotImplementedException()
     }
 

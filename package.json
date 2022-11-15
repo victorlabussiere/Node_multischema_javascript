@@ -3,9 +3,12 @@
     "mongoose": "^6.7.2",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.25.3"
+    "sequelize": "^6.25.3",
+    "mocha": "^10.1.0"
+  },
+  "scripts": {
+    "test": "mocha src/test/*.js"
   },
   "devDependencies": {
-    "mocha": "^10.1.0"
   }
 }

@@ -49,22 +49,21 @@ class Postgres extends ICrud {
             .then(response => response = true)
             .catch(error => console.error('Connection error', error))
     }
-
+    //
     async create(item) {
         let count = 0
-        const list = await this._herois.findAll()
+        await this._herois.findAll()
             .then(res => res.map(hero => hero.dataValues))
             .then(dat => dat.map(inst =>
                 inst.poder === item.poder && inst.nome === item.nome || inst.id === item.id
                     ? count++
-                    : count + 0))
+                    : count
+            ))
             .catch(errCreate => console.error('HERÓI NÃO CADASTRADO:', errCreate.message))
 
-        if (count === 0) {
-            await this._herois.create(item)
-                .catch(err => console.error('Erro', err))
-            return true
-        }
+        return count === 0
+            ? await this._herois.create(item).then(res => res.dataValues)
+            : "Herói já cadastrado! Tente outro."
     }
 
     async read(params = {}) {
@@ -81,9 +80,11 @@ class Postgres extends ICrud {
     }
 
     async delete(id) {
-        const query = id ? { id } : {}
+        const query = id
+            ? { id }
+            : {}
+
         return await this._herois.destroy({ where: query })
     }
 }
-
 module.exports = Postgres
